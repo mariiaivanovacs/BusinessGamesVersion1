@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+*.local
+
+# Backend secrets & generated data
+backend/.env
+backend/participants.json
+backend/admin.json
+
+# Frontend env (contains API URL — not secret but keep local)
+.env

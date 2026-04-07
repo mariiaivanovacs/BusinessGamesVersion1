@@ -1,0 +1,63 @@
+# ─────────────────────────────────────────────────────────
+# Decap CMS — Business Games
+# GitHub Pages + GitHub backend (no external server needed)
+#
+# SETUP:
+#  1. Replace "username/BusinessGames" with your actual repo path.
+#  2. Create a GitHub OAuth App:
+#       Settings → Developer Settings → OAuth Apps → New
+#       Homepage URL: https://username.github.io/BusinessGames/
+#       Callback URL: https://username.github.io/BusinessGames/admin/
+#  3. Set app_id to your OAuth App's Client ID.
+#  4. Commit and push — then visit /admin on your live site.
+# ─────────────────────────────────────────────────────────
+
+backend:
+  name: github
+  repo: username/BusinessGames   # ← change to your repo
+  branch: main
+  auth_type: pkce
+  app_id: YOUR_GITHUB_OAUTH_APP_CLIENT_ID   # ← change this
+
+media_folder: "public/images"
+public_folder: "/images"
+
+collections:
+
+  - name: "events"
+    label: "Events"
+    folder: "content/events"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title",        name: "title",        widget: "string" }
+      - { label: "Date & Time",  name: "date",         widget: "datetime", format: "YYYY-MM-DD HH:mm" }
+      - { label: "Time Label",   name: "time",         widget: "string",   hint: "Display text e.g. '10:00 — 17:00'" }
+      - { label: "Price (RUB)",  name: "price",        widget: "number",   default: 0 }
+      - { label: "Description",  name: "description",  widget: "text" }
+      - { label: "Image",        name: "image",        widget: "image",    required: false }
+      - label: "Status"
+        name: "status"
+        widget: "select"
+        options: ["current", "future", "past"]
+        default: "future"
+      - { label: "Payment Link", name: "payment_link", widget: "string",   required: false }
+      - label: "Tags"
+        name: "tags"
+        widget: "list"
+        field: { label: "Tag", name: "tag", widget: "string" }
+
+  - name: "about_person"
+    label: "About Person"
+    folder: "content/about_person"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Full Name",  name: "name",  widget: "string" }
+      - { label: "Role/Title", name: "role",  widget: "string" }
+      - { label: "Biography",  name: "bio",   widget: "text" }
+      - { label: "Photo",      name: "photo", widget: "image", required: false }
+      - label: "Social / Contact Links"
+        name: "social_links"
+        widget: "list"
+        field: { label: "URL", name: "url", widget: "string" }

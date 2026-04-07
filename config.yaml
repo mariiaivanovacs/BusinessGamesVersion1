@@ -1,0 +1,49 @@
+backend:
+  name: github
+  repo: "username/repo" # замени на свой GitHub репозиторий
+  branch: main
+  auth_scope: repo
+
+media_folder: "public/images" # где будут храниться изображения
+public_folder: "/images"
+
+publish_mode: editorial_workflow
+
+collections:
+  - name: "events"
+    label: "События"
+    folder: "content/events"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Название", name: "title", widget: "string" }
+      - { label: "Дата", name: "date", widget: "datetime", format: "YYYY-MM-DD HH:mm" }
+      - { label: "Время", name: "time", widget: "string" }
+      - { label: "Цена билета", name: "price", widget: "number" }
+      - { label: "Описание", name: "description", widget: "text" }
+      - { label: "Картинка", name: "image", widget: "image" }
+      - { label: "Статус", name: "status", widget: "select", options: ["current", "future", "past"], default: "current" }
+      - { label: "Ссылка на оплату", name: "payment_link", widget: "string" }
+
+  - name: "about_person"
+    label: "О личности"
+    folder: "content/about_person"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Имя", name: "name", widget: "string" }
+      - { label: "Должность / Роль", name: "role", widget: "string" }
+      - { label: "Биография", name: "bio", widget: "text" }
+      - { label: "Фото", name: "photo", widget: "image" }
+      - { label: "Ссылки", name: "social_links", widget: "list", field: {label: "URL", name: "url", widget: "string"} }
+
+  - name: "brand_page"
+    label: "Главная страница"
+    folder: "content/brand_page"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Заголовок", name: "title", widget: "string" }
+      - { label: "Описание бренда", name: "description", widget: "text" }
+      - { label: "Изображения для лендинга", name: "images", widget: "list", field: {label: "Image", name: "image", widget: "image"} }
+      - { label: "Анимации / эффекты", name: "effects", widget: "list", field: {label: "Effect", name: "effect", widget: "string"} }
