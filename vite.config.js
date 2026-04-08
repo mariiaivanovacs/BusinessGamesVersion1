@@ -1,10 +1,14 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Change base to match your GitHub repository name
-// e.g. if repo is github.com/username/business-games → base: '/business-games/'
 export default defineConfig({
   plugins: [react()],
   base: '/BusinessGamesVersion1/',
+  // Build outputs to docs/ so GitHub Pages (main branch → /docs) is updated
+  // by simply running: npm run build && git add docs && git commit && git push
+  build: {
+    outDir: 'docs',
+    emptyOutDir: true,
+  },
   assetsInclude: ['**/*.PNG', '**/*.png', '**/*.JPG', '**/*.jpg'],
 })

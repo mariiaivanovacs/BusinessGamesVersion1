@@ -16,12 +16,9 @@
 # 3. Update the two lines marked <-- below, then commit and push.
 
 backend:
-  name: github
-  repo: mariiaivanovacs/BusinessGamesVersion1
-  branch: main
-  base_url: https://api.netlify.com
-  auth_endpoint: auth
-  site_id: c76b56c7-9231-42f4-8701-c6ea67f2d3e7
+  name: git-gateway          # Use Git Gateway for Netlify Identity auth
+  branch: main               # Branch to push content
+  base_url: https://businessgamesversion1.netlify.app  # Your Netlify Identity site
 
 site_url: https://mariiaivanovacs.github.io/BusinessGamesVersion1
 
@@ -31,6 +28,7 @@ media_folder: public/images/uploads
 public_folder: /images/uploads
 
 locale: ru
+
 
 collections:
   # ── Мероприятия (Events) ────────────────────────────────────────────────────

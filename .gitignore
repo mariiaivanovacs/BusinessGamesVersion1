@@ -7,11 +7,12 @@ dist/
 backend/.env
 backend/participants.json
 backend/admin.json
-
-# Backend uploads — photos live in public/images/uploads/ for static hosting
 backend/uploads/
 
-# ── Frontend env (local API URL — not needed for static build) ────────────────
+# ── Frontend env ──────────────────────────────────────────────────────────────
 .env
 .env.local
 .env.*.local
+
+# docs/ is intentionally tracked — it is the GitHub Pages build output.
+# Run: npm run build && git add docs && git commit -m "build" && git push

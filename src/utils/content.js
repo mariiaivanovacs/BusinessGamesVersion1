@@ -96,7 +96,7 @@ export function resolveAssetPath(path) {
 // ── Load all events from markdown files (build-time, no server needed) ───────
 export function loadEvents() {
   try {
-    const modules = import.meta.glob('/content/events/*.md', { as: 'raw', eager: true })
+    const modules = import.meta.glob('/content/events/*.md', { query: '?raw', import: 'default', eager: true })
     return Object.entries(modules)
       .map(([path, raw]) => {
         const { data } = parseFrontmatter(raw)
@@ -116,7 +116,7 @@ export function loadEvents() {
 // ── Load About / speaker profile from markdown ───────────────────────────────
 export function loadAboutPerson() {
   try {
-    const modules = import.meta.glob('/content/about_person/*.md', { as: 'raw', eager: true })
+    const modules = import.meta.glob('/content/about_person/*.md', { query: '?raw', import: 'default', eager: true })
     const entries = Object.values(modules)
     if (!entries.length) return null
     return parseFrontmatter(entries[0]).data
