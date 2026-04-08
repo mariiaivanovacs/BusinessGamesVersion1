@@ -5,6 +5,6 @@ import react from '@vitejs/plugin-react'
 // e.g. if repo is github.com/username/business-games → base: '/business-games/'
 export default defineConfig({
   plugins: [react()],
-  base: '/BusinessGames/',
+  base: '/BusinessGamesVersion1/',
   assetsInclude: ['**/*.PNG', '**/*.png', '**/*.JPG', '**/*.jpg'],
 })
