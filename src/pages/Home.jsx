@@ -31,9 +31,9 @@ import envelopeIcon from '/envelope_icon.png'
 // wowIcon.style.height = '40px';
 
 
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import EventCard from '../components/EventCard'
-import { fetchEvents } from '../utils/content'
+import { loadEvents } from '../utils/content'
 
 // Примеры сценариев (из content.md)
 const PROGRAMS = [
@@ -206,14 +206,10 @@ export default function Home() {
   const bgUrl  = `url(${bgImage})`
   const bg2Url = `url(${bg2})`
 
-  const [upcomingEvents, setUpcomingEvents] = useState([])
-  useEffect(() => {
-    fetchEvents().then(data =>
-      setUpcomingEvents(
-        data.filter(e => e.status === 'current' || e.status === 'future').slice(0, 3)
-      )
-    )
-  }, [])
+  const upcomingEvents = useMemo(
+    () => loadEvents().filter(e => e.status === 'current' || e.status === 'future').slice(0, 3),
+    []
+  )
 
   return (
     <main>

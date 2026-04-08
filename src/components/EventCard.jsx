@@ -3,8 +3,6 @@ import img2 from '/image_2.jpg'
 import img3 from '/image_3.png'
 import { formatDate, formatPrice } from '../utils/content'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
 const FALLBACK_IMAGES = [img1, img2, img3]
 
 // Deterministic: same event always gets the same image across renders
@@ -15,12 +13,13 @@ function pickFallbackImage(slug, index) {
 
 export default function EventCard({ event, index }) {
   const fallbackSrc = pickFallbackImage(event.slug, index)
+  const imageSrc    = event.image || fallbackSrc
 
   return (
     <article className="event-card">
       <div className="event-card__img">
         <img
-          src={event.image || fallbackSrc}
+          src={imageSrc}
           alt={event.title}
           loading="lazy"
         />
@@ -45,10 +44,10 @@ export default function EventCard({ event, index }) {
             <div className="event-card__price-lbl">на одного человека</div>
           </div>
 
-          {event.id
+          {event.payment_link
             ? (
               <a
-                href={`${API}/events/${event.id}/buy`}
+                href={event.payment_link}
                 className="btn-register"
                 target="_blank"
                 rel="noopener noreferrer"

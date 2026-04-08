@@ -1,13 +1,5 @@
-import { useState, useEffect } from 'react'
 import bgImage from '/background_2.png'
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
-// Only resolve /uploads/ paths — discard anything else (external URLs don't work as <img src>)
-function resolvePhoto(url) {
-  if (!url || !url.startsWith('/uploads/')) return null
-  return `${API}${url}`
-}
+import { loadAboutPerson, resolveAssetPath } from '../utils/content'
 
 const FALLBACK = {
   name:  'Наталья Крюкова',
@@ -44,19 +36,14 @@ function getSocialLabel(url) {
 
 export default function About() {
   const bgUrl = `url(${bgImage})`
-  const [person, setPerson] = useState(null)
 
-  useEffect(() => {
-    fetch(`${API}/about`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => setPerson(data || FALLBACK))
-      .catch(() => setPerson(FALLBACK))
-  }, [])
+  const raw    = loadAboutPerson()
+  const data   = raw ?? FALLBACK
 
-  const data     = person ?? FALLBACK
-  const bioParas = (data.bio ?? '').split('\n\n').filter(Boolean)
-  const links    = Array.isArray(data.social_links) ? data.social_links : []
-  const stats    = Array.isArray(data.stats) && data.stats.length ? data.stats : FALLBACK.stats
+  const photoSrc  = resolveAssetPath(data.photo)
+  const bioParas  = (data.bio ?? '').split('\n\n').filter(Boolean)
+  const links     = Array.isArray(data.social_links) ? data.social_links.filter(Boolean) : []
+  const stats     = Array.isArray(data.stats) && data.stats.length ? data.stats : FALLBACK.stats
 
   return (
     <main>
@@ -77,8 +64,8 @@ export default function About() {
             {/* Photo column */}
             <div className="about-photo-sticky">
               <div className="about-photo">
-                {data.photo
-                  ? <img src={resolvePhoto(data.photo)} alt={data.name} />
+                {photoSrc
+                  ? <img src={photoSrc} alt={data.name} />
                   : (
                     <div className="about-photo__placeholder">
                       {data.name?.split(' ').map(w => w[0]).join('').slice(0, 2)}
@@ -112,8 +99,8 @@ export default function About() {
 
               {links.length > 0 && (
                 <div className="social-row">
-                  {links.map(url => (
-                    <a key={url} href={url} className="social-link"
+                  {links.map((url, i) => (
+                    <a key={i} href={url} className="social-link"
                       target="_blank" rel="noopener noreferrer">
                       {getSocialLabel(url)} ↗
                     </a>

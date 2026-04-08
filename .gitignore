@@ -3,10 +3,15 @@ dist/
 .DS_Store
 *.local
 
-# Backend secrets & generated data
+# ── Backend secrets & generated data (never commit) ──────────────────────────
 backend/.env
 backend/participants.json
 backend/admin.json
 
-# Frontend env (contains API URL — not secret but keep local)
+# Backend uploads — photos live in public/images/uploads/ for static hosting
+backend/uploads/
+
+# ── Frontend env (local API URL — not needed for static build) ────────────────
 .env
+.env.local
+.env.*.local

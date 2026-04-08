@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import bgImage from '/background_el.JPG'
 import EventCard from '../components/EventCard'
-import { fetchEvents } from '../utils/content'
+import { loadEvents } from '../utils/content'
 
 const FILTERS = [
   { key: 'all',     label: 'Все' },
@@ -10,15 +10,13 @@ const FILTERS = [
 ]
 
 export default function Events() {
-  const [filter, setFilter] = useState('all')
-  const [allEventsFull, setAllEventsFull] = useState([])
-  const bgUrl = `url(${bgImage})`
+  const [filter, setFilter]  = useState('all')
+  const bgUrl                = `url(${bgImage})`
 
-  useEffect(() => {
-    fetchEvents().then(data => setAllEventsFull(data.filter(e => e.status !== 'past')))
-  }, [])
-
-  const allEvents = allEventsFull
+  const allEvents = useMemo(
+    () => loadEvents().filter(e => e.status !== 'past'),
+    []
+  )
 
   const displayed = filter === 'all'
     ? allEvents
