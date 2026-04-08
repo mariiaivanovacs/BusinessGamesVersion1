@@ -1,4 +1,5 @@
 import bgImage from '/background_2.png'
+import speakerPhoto from '/speaker_photo.jpeg'
 import { loadAboutPerson, resolveAssetPath } from '../utils/content'
 
 const FALLBACK = {
@@ -64,14 +65,7 @@ export default function About() {
             {/* Photo column */}
             <div className="about-photo-sticky">
               <div className="about-photo">
-                {photoSrc
-                  ? <img src={photoSrc} alt={data.name} />
-                  : (
-                    <div className="about-photo__placeholder">
-                      {data.name?.split(' ').map(w => w[0]).join('').slice(0, 2)}
-                    </div>
-                  )
-                }
+                <img src={photoSrc ?? speakerPhoto} alt={data.name} />
               </div>
             </div>
 
