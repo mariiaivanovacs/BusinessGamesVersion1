@@ -17,12 +17,13 @@
 
 backend:
   name: github
-  repo: mariiaivanovacs/BusinessGamesVersion1  # <-- change to your GitHub username/repo
+  repo: mariiaivanovacs/BusinessGamesVersion1
   branch: main
   base_url: https://api.netlify.com
   auth_endpoint: auth
+  site_id: c76b56c7-9231-42f4-8701-c6ea67f2d3e7
 
-site_url: https://mariiaivanovacs.github.io/BusinessGamesVersion1 # <-- change
+site_url: https://mariiaivanovacs.github.io/BusinessGamesVersion1
 
 # Where Decap CMS stores uploaded images in the repo
 media_folder: public/images/uploads
