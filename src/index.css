@@ -127,8 +127,8 @@ ul { list-style: none; }
 }
 
 .btn-gold {
-  background: var(--c-gold);
-  color: var(--c-forest);
+  background: var(--c-cream);
+  color: var(--c-charcoal);
   font-weight: 600;
 }
 .btn-gold:hover {
@@ -397,7 +397,23 @@ ul { list-style: none; }
 .hero__bg--gradient {
   transform: none !important;
   transition: none;
-  background:
+  /* background: linear-gradient(
+to bottom,
+#1a0d07 0%,
+#3b1408 25%,
+#7a2a0c 55%,
+#c75a1a 80%,
+#f2a65a 100%
+); */
+background: radial-gradient(
+  circle at bottom left,
+  #ffb86b 0%,
+  #c75a1a 30%,
+  #7a2a0c 55%,
+  #2a0f07 80%,
+  #140a05 100%
+);
+  /* background:
     repeating-linear-gradient(
       -55deg,
       rgba(255,255,255,0.03) 0px,
@@ -412,16 +428,16 @@ ul { list-style: none; }
       transparent 1px,
       transparent 48px
     ),
-    radial-gradient(ellipse at 70% 40%, #AA491E 0%, #6B2A0A 45%, #1a0b04 100%);
+    radial-gradient(ellipse at 70% 40%, #AA491E 0%, #6B2A0A 45%, #1a0b04 100%); */
 }
 
 .hero__overlay {
       position: absolute;
     inset: 0;
-        background: linear-gradient(150deg,
+        /* background: linear-gradient(150deg,
          rgb(28 38 32 / 64%) 0%,
           rgb(228 116 29 / 51%) 55%,
-           rgba(12, 22, 12, 0.43) 100%);
+           rgba(12, 22, 12, 0.43) 100%); */
 }
 
 .hero__content {
@@ -455,7 +471,7 @@ ul { list-style: none; }
 .hero__title {
   font-family: var(--font-serif);
   font-size: clamp(2.625rem, 4vw, 4vw);
-  font-weight: 700;
+  font-weight: 500;
   color: var(--c-cream);
   line-height: 1.06;
   letter-spacing: -0.01em;
@@ -463,8 +479,8 @@ ul { list-style: none; }
 }
 
 .hero__title em {
-  font-style: italic;
-  color: var(--c-gold);
+      font-style: italic;
+    color: var(--c-cream);
 }
 
 .hero__subtitle {
@@ -569,7 +585,7 @@ ul { list-style: none; }
   bottom: 2.5rem;
   right: 2.5rem;
   z-index: 3;
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: flex-end;
   /* gap: 1rem; */
@@ -1486,7 +1502,7 @@ ul { list-style: none; }
 
 .footer__partners-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 1rem;
   margin-top: 0.25rem;
 }
@@ -1495,14 +1511,20 @@ ul { list-style: none; }
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-width: 300px;
+}
+.footer__partner_ie {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .footer__partner-logo {
-  width: 60px;
-  height: 60px;
+  width: 120px;
+  height: 120px;
   object-fit: contain;
   border-radius: var(--r-sm);
-  opacity: 0.75;
+  /* opacity: 0.75; */
   filter: brightness(1.1);
   flex-shrink: 0;
 }
@@ -1537,6 +1559,15 @@ ul { list-style: none; }
   color: var(--c-gold);
   margin-bottom: 1.25rem;
 }
+.footer__col-heading_ie {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--c-gold);
+  margin-top: 1.25rem; 
+}
+
 
 .footer__links {
   display: flex;
@@ -1924,6 +1955,13 @@ ul { list-style: none; }
 
   .footer__bottom { flex-direction: column; text-align: center; }
 }
+/* 
+
+p.hero__title-text {
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+} */
+
 
 /* Mobile small */
 @media (max-width: 480px) {
@@ -1939,7 +1977,7 @@ ul { list-style: none; }
   .hero__content { padding-bottom: 4rem;
         padding-top: 12rem;}
   .hero__title {         /* flex-direction: column; */
-        font-size: 1.75rem;
+        font-size: 1.5rem;
         /* justify-content: center; */
         padding: 0 10px;
         /* display: flex; */
@@ -2005,11 +2043,11 @@ ul { list-style: none; }
     margin-bottom: 0.75rem;
   }
 
-  .footer__partners-list { gap: 0.625rem; }
+  .footer__partners-list { gap: 0.625rem; flex-direction: column; }
 
   .footer__partner-logo {
-    width: 26px;
-    height: 26px;
+    width: 120px;
+    height: 120px;
   }
 
   .footer__partner-name { font-size: 0.75rem; }
@@ -2658,6 +2696,8 @@ ul { list-style: none; }
   .brand-pillars-flow { gap: 1.5rem; }
   .cycle-flow { gap: 1.5rem; }
   .sample-editorial__meta { gap: 1.25rem; }
+
+  .footer__partners-list { gap: 0.625rem; flex-direction: column; }
 }
 
 

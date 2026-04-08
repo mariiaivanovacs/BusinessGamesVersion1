@@ -54,6 +54,9 @@ export default function Footer() {
                 </div>
               ))}
             </div>
+            <div className="footer__partner footer__partner_ie">
+            <p className="footer__col-heading_ie">ИП Крюкова</p>
+            </div>
           </div>
 
           {/* Contacts */}

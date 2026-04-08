@@ -216,8 +216,8 @@ export default function Home() {
 
       {/* ── HERO ── */}
       <section className="hero">
-        {/* <div className="hero__bg hero__bg--gradient" /> */}
-        <div className="hero__bg" style={{ backgroundImage: bgUrl }} />
+        <div className="hero__bg hero__bg--gradient" />
+        {/* <div className="hero__bg" style={{ backgroundImage: bgUrl }} /> */}
         <div className="hero__overlay"  />
 
         <div className="container hero__content">
@@ -225,8 +225,8 @@ export default function Home() {
             <p className="label hero__label">Бизнес-игры, как инструмент решения реальных задач</p>
 
             <h1 className="hero__title">
-              <div>Территория мышления<br /></div>
-              <div><em>Фестиваль бизнес-игр</em></div>
+              <div><p class="hero__title-text hero__title-text_1">Территория мышления<br /></p></div>
+              <div><p class="hero__title-text hero__title-text_2"><em>Фестиваль бизнес-игр</em></p></div>
             </h1>
 
             <p className="hero__subtitle">

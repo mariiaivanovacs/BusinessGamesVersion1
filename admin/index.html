@@ -4,23 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Панель управления · Бизнес Игры</title>
-
-    <!-- Manual login override must be before Decap CMS script -->
-    <script>
-      window.CMS_MANUAL_LOGIN_URL = function() {
-        const url = new URL('https://api.netlify.com/auth');
-        url.searchParams.set('provider', 'github');
-        url.searchParams.set('site_id', 'c76b56c7-9231-42f4-8701-c6ea67f2d3e7');
-        url.searchParams.set('scope', 'repo');
-        return url.toString();
-      };
-    </script>
-
-    <!-- Load Decap CMS -->
-    <script src="https://unpkg.com/decap-cms@3.3.3/dist/decap-cms.js"></script>
   </head>
-
   <body>
-    <!-- CMS will automatically mount here -->
+    <script src="https://unpkg.com/decap-cms@3.3.3/dist/decap-cms.js"></script>
   </body>
 </html>
