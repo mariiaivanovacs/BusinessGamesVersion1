@@ -14,14 +14,10 @@
 #    Paste the Client ID + Secret from step 1.
 #
 # 3. Update the two lines marked <-- below, then commit and push.
-
 backend:
-  name: github
-  repo: mariiaivanovacs/BusinessGamesVersion1
-  branch: main
-  base_url: https://api.netlify.com
-  auth_endpoint: auth
-  site_id: c76b56c7-9231-42f4-8701-c6ea67f2d3e7
+  name: git-gateway          # Use Netlify Git Gateway for auth
+  branch: main               # Branch to push content
+  base_url: https://businessgamesversion1.netlify.app  # Netlify site handling Identity
 
 site_url: https://mariiaivanovacs.github.io/BusinessGamesVersion1
 
