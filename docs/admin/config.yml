@@ -1,0 +1,141 @@
+# Decap CMS Configuration for BusinessGames
+#
+# ONE-TIME SETUP (do this before first use):
+# ─────────────────────────────────────────
+# 1. Create a GitHub OAuth App:
+#    https://github.com/settings/developers → "New OAuth App"
+#    - Homepage URL:            https://YOUR_USERNAME.github.io/BusinessGames/
+#    - Authorization callback:  https://api.netlify.com/auth/done
+#    Save Client ID and Client Secret.
+#
+# 2. Add the site to Netlify (free — for OAuth only, no deploy needed):
+#    https://app.netlify.com → "Add new site" → "Deploy manually"
+#    Then: Site Settings → Access control → OAuth → Install provider → GitHub
+#    Paste the Client ID + Secret from step 1.
+#
+# 3. Update the two lines marked <-- below, then commit and push.
+
+backend:
+  name: github
+  repo: mariiaivanovacs/BusinessGamesVersion1
+  branch: main
+  base_url: https://api.netlify.com
+  auth_endpoint: auth
+  site_id: c76b56c7-9231-42f4-8701-c6ea67f2d3e7
+
+site_url: https://mariiaivanovacs.github.io/BusinessGamesVersion1
+
+# Where Decap CMS stores uploaded images in the repo
+media_folder: public/images/uploads
+# URL prefix stored in content frontmatter
+public_folder: /images/uploads
+
+locale: ru
+
+collections:
+  # ── Мероприятия (Events) ────────────────────────────────────────────────────
+  - name: events
+    label: Мероприятия
+    label_singular: Мероприятие
+    folder: content/events
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    summary: "{{title}} — {{date}}"
+    fields:
+      - label: Название
+        name: title
+        widget: string
+
+      - label: Дата и время начала
+        name: date
+        widget: datetime
+        format: "YYYY-MM-DD HH:mm"
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm"
+
+      - label: "Время (отображаемое на карточке)"
+        name: time
+        widget: string
+        hint: "Например: 10:00 — 18:00"
+        required: false
+        default: ""
+
+      - label: Цена (руб)
+        name: price
+        widget: number
+        default: 0
+        hint: "0 = бесплатно"
+
+      - label: Описание
+        name: description
+        widget: text
+        hint: "1–2 предложения для карточки мероприятия"
+
+      - label: Изображение
+        name: image
+        widget: image
+        required: false
+        hint: "Рекомендуемая ширина ≥ 800 пикс. Если не задано — используется шаблонное фото."
+
+      - label: Статус
+        name: status
+        widget: select
+        options:
+          - { label: "Скоро", value: "future" }
+          - { label: "Идёт сейчас", value: "current" }
+          - { label: "Прошедшее (скрыть)", value: "past" }
+        default: future
+
+      - label: Ссылка на оплату
+        name: payment_link
+        widget: string
+        required: false
+        hint: "Прямая ссылка на страницу оплаты (YooKassa, Tinkoff и т.д.)"
+
+      - label: Теги
+        name: tags
+        widget: list
+        required: false
+        hint: "Через Enter: мышление, переговоры, лидерство"
+
+  # ── О нас (About) ───────────────────────────────────────────────────────────
+  - name: about
+    label: О нас
+    files:
+      - label: Профиль спикера
+        name: founder
+        file: content/about_person/founder.md
+        fields:
+          - label: Имя
+            name: name
+            widget: string
+
+          - label: Должность / Роль
+            name: role
+            widget: string
+
+          - label: Биография
+            name: bio
+            widget: text
+            hint: "Разделяйте абзацы двумя переносами строки (пустая строка между ними)."
+
+          - label: Фото
+            name: photo
+            widget: image
+            required: false
+            hint: "Загрузите фото спикера (JPEG/PNG, рекомендуется квадратный формат)."
+
+          - label: Ссылки на соц. сети
+            name: social_links
+            widget: list
+            required: false
+            hint: "Полный URL, например https://t.me/username"
+
+          - label: Статистика
+            name: stats
+            widget: list
+            hint: "Три блока с цифрами (Сессий, Компаний, Участников)"
+            fields:
+              - { label: "Число", name: num, widget: string, hint: "Например: 70+" }
+              - { label: "Подпись", name: lbl, widget: string, hint: "Например: Сессий" }
