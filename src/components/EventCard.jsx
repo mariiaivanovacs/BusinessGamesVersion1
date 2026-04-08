@@ -1,6 +1,6 @@
-import img1 from '/image_1.jpg'
+import img1 from '/image_1.png'
 import img2 from '/image_2.jpg'
-import img3 from '/image_3.jpg'
+import img3 from '/image_3.png'
 import { formatDate, formatPrice } from '../utils/content'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000'

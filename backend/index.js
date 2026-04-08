@@ -9,6 +9,7 @@ const bcrypt     = require('bcryptjs')
 const jwt        = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
 const crypto     = require('crypto')
+const multer     = require('multer')
 
 // ── Config ────────────────────────────────────────────────
 const PORT         = process.env.PORT || 3000
@@ -17,6 +18,30 @@ const DATA_FILE    = path.join(__dirname, 'participants.json')
 const EVENTS_FILE  = path.join(__dirname, 'events.json')
 const ADMIN_FILE   = path.join(__dirname, 'admin.json')
 const ABOUT_FILE   = path.join(__dirname, 'about.json')
+const UPLOADS_DIR  = path.join(__dirname, 'uploads')
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR)
+
+// ── Multer — photo upload (memory storage so we control file lifecycle) ──
+const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp']
+const MIME_TO_EXT  = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp' }
+
+const uploadPhoto = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_MIME.includes(file.mimetype)) cb(null, true)
+    else cb(new Error('Разрешены только изображения (jpg, png, webp)'))
+  },
+})
+
+/** Delete all profile_* files from UPLOADS_DIR */
+function deleteAllProfilePhotos() {
+  try {
+    fs.readdirSync(UPLOADS_DIR)
+      .filter(f => f.startsWith('profile_'))
+      .forEach(f => { try { fs.unlinkSync(path.join(UPLOADS_DIR, f)) } catch {} })
+  } catch {}
+}
 
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'change_this_jwt_secret') {
   console.warn('[SECURITY] JWT_SECRET is not set or is using the default. Set a strong secret in .env!')
@@ -43,10 +68,12 @@ const app = express()
 app.use(cors({
   origin: [FRONTEND_URL, /\.timeweb\.cloud$/, /localhost/],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }))
 
 app.use('/webhook', express.raw({ type: 'application/json' }))
 app.use(bodyParser.json())
+app.use('/uploads', express.static(UPLOADS_DIR))
 
 // ── File helpers ──────────────────────────────────────────
 function readJSON(file, defaultVal) {
@@ -137,7 +164,8 @@ app.get('/about', (_req, res) => {
 
 // ── PUBLIC: Events list (payment_link hidden) ─────────────
 app.get('/events', (_req, res) => {
-  const events = readJSON(EVENTS_FILE, [])
+  const data = readJSON(EVENTS_FILE, [])
+  const events = Array.isArray(data) ? data : []
   const safe = events.map(({ payment_link, ...rest }) => rest) // eslint-disable-line no-unused-vars
   res.json(safe)
 })
@@ -210,21 +238,26 @@ app.post('/admin/verify-code', (req, res) => {
 
 // ── Change password (authenticated — confirms current password) ───
 app.post('/admin/change-password', requireAuth, (req, res) => {
-  const { currentPassword, newPassword } = req.body
-  if (!currentPassword || !newPassword) {
-    return res.status(400).json({ error: 'currentPassword and newPassword required' })
-  }
-  if (newPassword.length < 8) {
-    return res.status(400).json({ error: 'Пароль минимум 8 символов' })
-  }
+  try {
+    const { currentPassword, newPassword } = req.body
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'currentPassword and newPassword required' })
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'Пароль минимум 8 символов' })
+    }
 
-  const admin = getAdmin()
-  const match = bcrypt.compareSync(currentPassword, admin.passwordHash)
-  if (!match) return res.status(401).json({ error: 'Текущий пароль неверен' })
+    const admin = getAdmin()
+    const match = bcrypt.compareSync(currentPassword, admin.passwordHash)
+    if (!match) return res.status(401).json({ error: 'Текущий пароль неверен' })
 
-  admin.passwordHash = bcrypt.hashSync(newPassword, 10)
-  saveAdmin(admin)
-  res.json({ message: 'Пароль успешно изменён' })
+    admin.passwordHash = bcrypt.hashSync(newPassword, 10)
+    saveAdmin(admin)
+    res.json({ message: 'Пароль успешно изменён' })
+  } catch (err) {
+    console.error('[change-password] error:', err.message)
+    res.status(500).json({ error: 'Внутренняя ошибка сервера' })
+  }
 })
 
 // ── Password reset via email (login page "forgot password") ──────
@@ -289,6 +322,36 @@ app.post('/admin/reset-password', (req, res) => {
 })
 
 // ──────────────────────────────────────────────────────────
+//  ADMIN: PHOTO UPLOAD
+// ──────────────────────────────────────────────────────────
+
+app.post('/admin/upload-photo', requireAuth, (req, res) => {
+  uploadPhoto.single('photo')(req, res, (err) => {
+    if (err) {
+      // Multer errors (type mismatch, size limit) → always JSON
+      return res.status(400).json({ error: err.message })
+    }
+    if (!req.file) return res.status(400).json({ error: 'Файл не получен' })
+
+    // Delete ALL existing profile photos — only one is ever needed
+    deleteAllProfilePhotos()
+
+    // Write the new file from memory buffer with correct extension from MIME type
+    const ext      = MIME_TO_EXT[req.file.mimetype] || '.jpg'
+    const filename = `profile_${Date.now()}${ext}`
+    const destPath = path.join(UPLOADS_DIR, filename)
+    try {
+      fs.writeFileSync(destPath, req.file.buffer)
+    } catch (writeErr) {
+      console.error('[upload-photo] write error:', writeErr.message)
+      return res.status(500).json({ error: 'Не удалось сохранить файл' })
+    }
+
+    res.json({ url: `/uploads/${filename}` })
+  })
+})
+
+// ──────────────────────────────────────────────────────────
 //  ADMIN: ABOUT
 // ──────────────────────────────────────────────────────────
 
@@ -299,11 +362,32 @@ app.get('/admin/about', requireAuth, (_req, res) => {
 app.put('/admin/about', requireAuth, (req, res) => {
   const { name, role, bio, photo, social_links, stats } = req.body
   const current = getAbout()
+
+  // Only accept relative /uploads/ paths or empty; reject external URLs
+  let newPhoto = current.photo
+  if (typeof photo === 'string') {
+    const trimmed = photo.trim()
+    if (!trimmed || trimmed.startsWith('/uploads/')) {
+      newPhoto = trimmed || null
+    }
+    // else: ignore any external URL — keep existing value
+  }
+
+  // Clean up old uploaded file if it changed
+  if (current.photo && current.photo !== newPhoto && current.photo.startsWith('/uploads/')) {
+    const oldFile = path.join(UPLOADS_DIR, path.basename(current.photo))
+    if (fs.existsSync(oldFile)) {
+      try { fs.unlinkSync(oldFile) } catch (e) {
+        console.warn('[about] could not delete old photo:', e.message)
+      }
+    }
+  }
+
   const updated = {
     name:         typeof name  === 'string' ? name.trim()  : current.name,
     role:         typeof role  === 'string' ? role.trim()  : current.role,
     bio:          typeof bio   === 'string' ? bio.trim()   : current.bio,
-    photo:        typeof photo === 'string' ? (photo.trim() || null) : current.photo,
+    photo:        newPhoto,
     social_links: Array.isArray(social_links)
       ? social_links.map(s => (s || '').trim()).filter(Boolean)
       : current.social_links,
@@ -320,7 +404,8 @@ app.put('/admin/about', requireAuth, (req, res) => {
 // ──────────────────────────────────────────────────────────
 
 app.get('/admin/events', requireAuth, (_req, res) => {
-  res.json(readJSON(EVENTS_FILE, []))
+  const data = readJSON(EVENTS_FILE, [])
+  res.json(Array.isArray(data) ? data : [])
 })
 
 app.post('/admin/events', requireAuth, (req, res) => {
@@ -362,7 +447,7 @@ app.put('/admin/events/:id', requireAuth, (req, res) => {
     updated_at:   new Date().toISOString(),
   }
   events[idx] = updated
-  writeJSON(EVENTS_FILE, updated)
+  writeJSON(EVENTS_FILE, events)
   res.json(updated)
 })
 

@@ -3,11 +3,17 @@ import bgImage from '/background_2.png'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
+// Only resolve /uploads/ paths — discard anything else (external URLs don't work as <img src>)
+function resolvePhoto(url) {
+  if (!url || !url.startsWith('/uploads/')) return null
+  return `${API}${url}`
+}
+
 const FALLBACK = {
   name:  'Наталья Крюкова',
   role:  'Спикер',
   bio:   'Совладелец производственной компании в сфере металлообработки. Основатель центра бизнес-трекинга Асцель. Эксперт по стратегической диагностике. Бизнес-трекер для собственников и управленцев. Более 20 лет в управлении.',
-  photo: 'speaker_photo.jpeg',
+  photo: null,
   social_links: [],
   stats: [
     { num: '70+',  lbl: 'Сессий' },
@@ -72,7 +78,7 @@ export default function About() {
             <div className="about-photo-sticky">
               <div className="about-photo">
                 {data.photo
-                  ? <img src={data.photo} alt={data.name} />
+                  ? <img src={resolvePhoto(data.photo)} alt={data.name} />
                   : (
                     <div className="about-photo__placeholder">
                       {data.name?.split(' ').map(w => w[0]).join('').slice(0, 2)}

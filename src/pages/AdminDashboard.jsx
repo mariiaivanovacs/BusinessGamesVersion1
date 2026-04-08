@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import img1 from '/image_1.jpg'
+import img1 from '/image_1.png'
 import img2 from '/image_2.jpg'
-import img3 from '/image_3.jpg'
+import img3 from '/image_3.png'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 const FALLBACK_IMAGES = [img1, img2, img3]
@@ -154,6 +154,8 @@ export default function AdminDashboard() {
   const [aboutSaving, setAboutSaving]   = useState(false)
   const [aboutError, setAboutError]     = useState('')
   const [aboutInfo, setAboutInfo]       = useState('')
+  const [photoUploading, setPhotoUploading] = useState(false)
+  const [photoError, setPhotoError]         = useState('')
 
   // ── Load events ──
   const loadEvents = useCallback(async () => {
@@ -163,7 +165,8 @@ export default function AdminDashboard() {
       if (res.status === 401) { localStorage.removeItem('admin_token'); navigate('/admin'); return }
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      setEvents(data.sort((a, b) => new Date(a.date) - new Date(b.date)))
+      const list = Array.isArray(data) ? data : []
+      setEvents(list.sort((a, b) => new Date(a.date) - new Date(b.date)))
     } catch (err) {
       setEventsError(err.message || 'Ошибка загрузки')
     } finally {
@@ -177,11 +180,13 @@ export default function AdminDashboard() {
       const res = await fetch(`${API}/admin/about`, { headers: authHeaders() })
       if (!res.ok) return
       const d = await res.json()
+      // Only accept server-managed relative paths; ignore stale external URLs
+      const savedPhoto = (d.photo && d.photo.startsWith('/uploads/')) ? d.photo : ''
       setAboutForm({
         name:  d.name  || '',
         role:  d.role  || '',
         bio:   d.bio   || '',
-        photo: d.photo || '',
+        photo: savedPhoto,
         link1: d.social_links?.[0] || '',
         link2: d.social_links?.[1] || '',
         s1num: d.stats?.[0]?.num || '',
@@ -256,6 +261,21 @@ export default function AdminDashboard() {
     }
   }
 
+  // ── Mark event as past ──
+  async function handleMarkPast(id) {
+    try {
+      const res = await fetch(`${API}/admin/events/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ status: 'past' }),
+      })
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error) }
+      await loadEvents()
+    } catch (err) {
+      setEventsError(err.message || 'Ошибка обновления статуса')
+    }
+  }
+
   // ── Password change ──
   async function handleChangePassword(e) {
     e.preventDefault()
@@ -277,6 +297,48 @@ export default function AdminDashboard() {
       setPassError(err.message)
     } finally {
       setPassSaving(false)
+    }
+  }
+
+  // ── Photo upload ──
+  // Upload → persist to about.json immediately so reload never shows a stale path
+  async function handlePhotoUpload(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPhotoUploading(true)
+    setPhotoError('')
+    const formData = new FormData()
+    formData.append('photo', file)
+    try {
+      const token = localStorage.getItem('admin_token')
+
+      // Step 1: upload file, get back relative path
+      const uploadRes = await fetch(`${API}/admin/upload-photo`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      })
+      const uploadData = await uploadRes.json()
+      if (!uploadRes.ok) throw new Error(uploadData.error || 'Ошибка загрузки')
+
+      const newPhotoUrl = uploadData.url // e.g. /uploads/profile_1234.jpg
+
+      // Step 2: immediately persist the new path into about.json
+      // so that on reload the stored path always matches what's on disk
+      const currentAbout = await fetch(`${API}/admin/about`, { headers: authHeaders() })
+        .then(r => r.ok ? r.json() : {})
+      await fetch(`${API}/admin/about`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ ...currentAbout, photo: newPhotoUrl }),
+      })
+
+      setAboutForm(f => ({ ...f, photo: newPhotoUrl }))
+    } catch (err) {
+      setPhotoError(err.message)
+    } finally {
+      setPhotoUploading(false)
+      e.target.value = ''
     }
   }
 
@@ -444,14 +506,39 @@ export default function AdminDashboard() {
                   </label>
                 </div>
 
-                <label className="admin-label">Фото (URL)
-                  <span className="admin-label-hint"> — оставьте пустым, если нет фото</span>
-                  <input className="admin-input" type="url"
-                    value={aboutForm.photo}
-                    onChange={e => setAboutForm(f => ({ ...f, photo: e.target.value }))}
-                    placeholder="https://example.com/photo.jpg"
-                  />
-                </label>
+                <div className="admin-label">Фото профиля
+                  <div className="admin-photo-upload">
+                    {aboutForm.photo && aboutForm.photo.startsWith('/uploads/') && (
+                      <img
+                        src={`${API}${aboutForm.photo}`}
+                        alt="Фото профиля"
+                        className="admin-photo-preview"
+                      />
+                    )}
+                    <div className="admin-photo-actions">
+                      <label className={`admin-btn-sm admin-btn-sm--outline ${photoUploading ? 'admin-btn-sm--disabled' : ''}`}>
+                        {photoUploading ? 'Загрузка...' : (aboutForm.photo ? 'Заменить фото' : 'Загрузить фото')}
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          style={{ display: 'none' }}
+                          onChange={handlePhotoUpload}
+                          disabled={photoUploading}
+                        />
+                      </label>
+                      {aboutForm.photo && (
+                        <button
+                          type="button"
+                          className="admin-btn-sm admin-btn-sm--danger"
+                          onClick={() => { setAboutForm(f => ({ ...f, photo: '' })); setPhotoError('') }}
+                        >
+                          Удалить
+                        </button>
+                      )}
+                    </div>
+                    {photoError && <span className="admin-photo-error">{photoError}</span>}
+                  </div>
+                </div>
 
                 <label className="admin-label">Биография
                   <textarea className="admin-input admin-textarea" rows={6}
@@ -658,7 +745,7 @@ export default function AdminDashboard() {
                 <tbody>
                   {events.map((ev, i) => {
                     const thumb  = ev.image || pickFallbackImage(ev.id, i)
-                    const status = deriveStatus(ev.date)
+                    const status = ev.status === 'past' ? 'past' : deriveStatus(ev.date)
                     return (
                       <tr key={ev.id} className={`admin-tr admin-tr--${status}`}>
                         <td className="admin-td admin-td--img">
@@ -692,6 +779,15 @@ export default function AdminDashboard() {
                           )}
                         </td>
                         <td className="admin-td admin-td--actions">
+                          {status !== 'past' && (
+                            <button
+                              className="admin-btn-sm admin-btn-sm--outline admin-btn-past"
+                              onClick={() => handleMarkPast(ev.id)}
+                              title="Отметить как завершённое"
+                            >
+                              Завершилось
+                            </button>
+                          )}
                           <button className="admin-btn-icon" onClick={() => openEdit(ev)} title="Редактировать">
                             <IconEdit />
                           </button>

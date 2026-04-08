@@ -15,7 +15,7 @@ const HERO_PARTNERS = [
 
 // Hero / section images
 import teamImg     from '/image_2.jpg'
-import billiardsImg from '/image_1.jpg'
+import billiardsImg from '/image_1.png'
 
 // Silver icons
 import chessIcon from '/chess_icon.png'
@@ -220,8 +220,9 @@ export default function Home() {
 
       {/* ── HERO ── */}
       <section className="hero">
+        {/* <div className="hero__bg hero__bg--gradient" /> */}
         <div className="hero__bg" style={{ backgroundImage: bgUrl }} />
-        <div className="hero__overlay" />
+        <div className="hero__overlay"  />
 
         <div className="container hero__content">
           <div className="hero__left">
